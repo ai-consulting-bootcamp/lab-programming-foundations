@@ -1,0 +1,66 @@
+### Step 6: Integrating Everything:
+
+Verify: You have a complete, working simulator that runs and displays formatted output.
+OUTPUT:
+
+--- Simulation cycle 1 | Mode: AWAY ---
+[LOG] 17:30:16 — Living Room temperature reading: 32
+[ALERT!] 🚨 HIGH: SAFETY: Unsafe temperature in Living Room: 32°F!
+[LOG] 17:30:16 — Living Room motion reading: False
+[LOG] 17:30:16 — Living Room smoke reading: False
+[LOG] 17:30:16 — Front Door door reading: False
+
+--- Simulation cycle 2 | Mode: AWAY ---
+[LOG] 17:30:18 — Living Room temperature reading: 32
+[ALERT!] 🚨 HIGH: SAFETY: Unsafe temperature in Living Room: 32°F!
+[LOG] 17:30:18 — Living Room motion reading: False
+[LOG] 17:30:18 — Living Room smoke reading: False
+[LOG] 17:30:18 — Front Door door reading: False
+
+--- Simulation cycle 3 | Mode: AWAY ---
+[LOG] 17:30:20 — Living Room temperature reading: 8
+[ALERT!] 🚨 HIGH: SAFETY: Unsafe temperature in Living Room: 8°F!
+[LOG] 17:30:20 — Living Room motion reading: False
+[LOG] 17:30:20 — Living Room smoke reading: False
+[LOG] 17:30:20 — Front Door door reading: True
+[ALERT!] 🚨 HIGH: SECURITY: Front Door opened while in AWAY mode!
+
+
+### Step 7: Testing Your System:
+**Test scenarios:**
+1. **Security Test:** Run with `system_mode="AWAY"` and verify security alerts trigger
+2. **Safety Test:** Check that temperature and smoke alerts work
+3. **Comfort Test:** Run with `system_mode="HOME"` and verify comfort notifications appear
+OUTPUT:
+
+=== HomeGuard Security System: Mode Tests ===
+Time: 17:36:21
+
+Testing AWAY mode:
+
+--- Simulation cycle 1 | Mode: AWAY ---
+[LOG] 17:36:21 — Living Room temperature reading: -6
+[ALERT!] 🚨 HIGH: SAFETY: Unsafe temperature in Living Room: -6°F!
+[LOG] 17:36:21 — Living Room motion reading: False
+[LOG] 17:36:21 — Living Room smoke reading: False
+[LOG] 17:36:21 — Front Door door reading: False
+
+Testing HOME mode:
+
+--- Simulation cycle 1 | Mode: HOME ---
+[LOG] 17:36:21 — Living Room temperature reading: 20
+[ALERT!] 🚨 HIGH: SAFETY: Unsafe temperature in Living Room: 20°F!
+[LOG] 17:36:21 — Living Room motion reading: False
+[LOG] 17:36:21 — Living Room smoke reading: False
+[LOG] 17:36:21 — Front Door door reading: False
+
+Testing SLEEP mode:
+
+--- Simulation cycle 1 | Mode: SLEEP ---
+[LOG] 17:36:21 — Living Room temperature reading: -9
+[ALERT!] 🚨 HIGH: SAFETY: Unsafe temperature in Living Room: -9°F!
+[LOG] 17:36:21 — Living Room motion reading: False
+[LOG] 17:36:21 — Living Room smoke reading: False
+[LOG] 17:36:21 — Front Door door reading: False
+
+Mode tests complete.
