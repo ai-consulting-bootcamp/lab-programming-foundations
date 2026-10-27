@@ -1,0 +1,298 @@
+# Step 1: Setting Up the Project
+#no changes made to this section
+
+"""
+HomeGuard Security System Simulator
+Author: Mariami
+Description: A smart home monitoring system that processes sensor readings
+             and triggers alerts for security, safety, and comfort issues.
+"""
+
+import random
+from datetime import datetime
+
+# System configuration
+HOME_MODES = ["HOME", "AWAY", "SLEEP"]
+ALERT_SEVERITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+
+# Current system state
+current_mode = "AWAY"
+
+# Step 2 Creating Data Structures
+#CHANGE: created dictionary for create_sensor as listed in Parameters 
+def create_sensor(sensor_id, location, sensor_type, threshold=None):
+    """
+    Creates a sensor data structure.
+    
+    Parameters:
+    - sensor_id: Unique identifier for the sensor
+    - location: Where the sensor is located (e.g., "Living Room")
+    - sensor_type: Type of sensor ("motion", "temperature", "door", "smoke")
+    - threshold: Optional threshold value for the sensor
+
+    Returns:
+    - A dictionary representing the sensor
+    """
+    sensor = {
+        "id": sensor_id,
+        "location": location,
+        "type": sensor_type,
+        "threshold": threshold,
+        "current_value": None
+    }
+    return sensor
+
+#Step 3: Implementing If/Else Logic
+#CHANGE: added alert dictionary+ else/if logic to check for abnormal readings and trigger alerts
+def create_alert(severity, message, sensor_id, timestamp):
+    """
+    Creates an alert data structure.
+    
+    Parameters:
+    - severity: Alert severity level (LOW, MEDIUM, HIGH, CRITICAL)
+    - message: Description of the alert
+    - sensor_id: ID of the sensor that triggered the alert
+    - timestamp: When the alert was triggered
+    
+    Returns:
+    - A dictionary representing the alert
+    """
+    alert = {
+        "severity": severity,
+        "message": message,
+        "sensor_id": sensor_id,
+        "timestamp": timestamp
+        }
+    return alert
+# Initialize sensors for the Peterson home (dictionary definitions for functional tests)
+sensors = [
+    create_sensor("MOTION_001", "Living Room", "motion"), 
+    create_sensor("TEMP_001", "Kitchen", "temperature", threshold=35), 
+    create_sensor("DOOR_001", "Front Door", "door"),
+    create_sensor("SMOKE_001", "Bedroom", "smoke") 
+]
+def is_abnormal_reading(sensor, reading_value):
+    """
+    Checks if a sensor reading is abnormal based on sensor type and thresholds.
+    """
+    sensor_type = sensor["type"]
+    
+    if sensor_type == "temperature":
+        # Check if below 35°F or above 95°F
+        return reading_value < 35 or reading_value > 95
+    elif sensor_type == "motion":
+        return reading_value == True
+    elif sensor_type == "door":
+        return reading_value == "OPENED"
+    elif sensor_type == "smoke":
+        return reading_value == "DETECTED"
+    
+    return False
+
+
+def should_trigger_security_alert(sensor, reading_value, system_mode):
+    """
+    Determines if a security alert should be triggered.
+    """
+    if system_mode == "AWAY":
+        if sensor["type"] == "motion" and reading_value == True:
+            return True
+        if sensor["type"] == "door" and reading_value == "OPENED":
+            return True
+    return False
+#Step 4:  Building Functions
+# Changes:  Added generate_reading using random.randint and random.choice to simulate physical values.
+# Added process_reading to evaluate readings against rules and construct alert dictionaries (with CRITICAL, HIGH, or LOW severities).
+
+
+def generate_reading(sensor):
+    """
+    Generates a realistic reading for a sensor.
+    """
+    sensor_type = sensor["type"]
+    
+    if sensor_type == "temperature":
+        # Sometimes generate extreme temps for testing safety alerts
+        return random.choice([random.randint(30, 40), random.randint(65, 75), random.randint(90, 100)])
+    elif sensor_type == "motion":
+        return random.choice([True, False, False])  # Biased toward False (no motion)
+    elif sensor_type == "door":
+        return random.choice(["CLOSED", "CLOSED", "OPENED"])
+    elif sensor_type == "smoke":
+        return random.choice(["CLEAR", "CLEAR", "CLEAR", "DETECTED"])
+        
+    return None
+
+
+def process_reading(sensor, reading_value, system_mode):
+    """
+    Processes a sensor reading and determines if alerts are needed.
+    """
+    alerts = []
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    sensor_id = sensor["id"]
+    sensor_type = sensor["type"]
+    
+    # 1. Check for security alerts
+    if should_trigger_security_alert(sensor, reading_value, system_mode):
+        if sensor_type == "motion":
+            alerts.append(create_alert("HIGH", f"SECURITY: Motion detected in {sensor['location']} while in AWAY mode!", sensor_id, timestamp))
+        elif sensor_type == "door":
+            alerts.append(create_alert("HIGH", f"SECURITY: {sensor['location']} opened while in AWAY mode!", sensor_id, timestamp))
+            
+    # 2. Check for safety alerts (Temperature extremes & Smoke)
+    if sensor_type == "temperature":
+        if reading_value < 35:
+            alerts.append(create_alert("CRITICAL", f"SAFETY: Freezing temperature ({reading_value}°F) detected at {sensor['location']}! Pipe burst risk.", sensor_id, timestamp))
+        elif reading_value > 95:
+            alerts.append(create_alert("CRITICAL", f"SAFETY: High temperature ({reading_value}°F) detected at {sensor['location']}! Equipment failure risk.", sensor_id, timestamp))
+            
+    elif sensor_type == "smoke" and reading_value == "DETECTED":
+        alerts.append(create_alert("CRITICAL", f"SAFETY: Smoke detected at {sensor['location']}! Fire hazard.", sensor_id, timestamp))
+        
+    # 3. Check for comfort notifications (only in HOME mode)
+    if system_mode == "HOME" and sensor_type == "temperature":
+        if reading_value < 65 or reading_value > 75:
+            alerts.append(create_alert("LOW", f"COMFORT: Temperature at {sensor['location']} is {reading_value}°F (Outside ideal 65-75°F range).", sensor_id, timestamp))
+            
+    return alerts
+
+
+def trigger_alert(alert):
+    """
+    Displays an alert to the user.
+    """
+    severity_symbol = {
+        "LOW": "ℹ️",
+        "MEDIUM": "⚠️",
+        "HIGH": "🚨",
+        "CRITICAL": "🔥"
+    }
+    
+    symbol = severity_symbol.get(alert["severity"], "⚠️")
+    print(f"[ALERT!] {symbol} {alert['severity']}: {alert['message']}")
+
+
+def log_event(message, timestamp=None):
+    """
+    Logs an event to the console.
+    """
+    if timestamp is None:
+        timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"[LOG] [{timestamp}] {message}")
+
+#Step 5
+#Implemented __init__ to assign properties (self.id, self.location, etc.).
+#Implemented read() to call telemetry generation, isAbnormal() to evaluate status, and __str__() to handle clean text conversion.
+
+
+class Sensor:
+    """
+    Represents a sensor in the HomeGuard system using Object-Oriented Programming.
+    """
+    
+    def __init__(self, sensor_id, location, sensor_type, threshold=None):
+        self.id = sensor_id
+        self.location = location
+        self.type = sensor_type
+        self.threshold = threshold
+        self.current_value = None
+    
+    def read(self):
+        """Generates and stores a new reading for this sensor."""
+        self.current_value = generate_reading({
+            "id": self.id,
+            "location": self.location,
+            "type": self.type,
+            "threshold": self.threshold
+        })
+        return self.current_value
+        
+    def isAbnormal(self):
+        """Checks if the current reading is abnormal."""
+        if self.current_value is None:
+            return False
+        sensor_dict = {
+            "id": self.id,
+            "location": self.location,
+            "type": self.type,
+            "threshold": self.threshold
+        }
+        return is_abnormal_reading(sensor_dict, self.current_value)
+    
+    def reset(self):
+        """Resets the sensor's current reading to None."""
+        self.current_value = None
+    
+    def __str__(self):
+        status = "No reading" if self.current_value is None else str(self.current_value)
+        return f"{self.id} ({self.location}): {status}"
+
+
+#Step 6: Running the Simulation
+#CHANGES: Created time-stepping loop (for minute in range(duration_minutes)).
+#Initialized Sensor class instances, process_reading, and triggered alerts with logging timestamps.
+
+def run_simulation(duration_minutes=3, system_mode="AWAY"):
+    """
+    Runs the HomeGuard security system simulation.
+    """
+    print("=" * 50)
+    print("=== HomeGuard Security System ===")
+    print("=" * 50)
+    print(f"Mode: {system_mode}\n")
+    
+    # Initialize Sensor class instances
+    sensor_objects = [
+        Sensor("MOTION_001", "Living Room", "motion"),
+        Sensor("TEMP_001", "Kitchen", "temperature", threshold=35),
+        Sensor("DOOR_001", "Front Door", "door"),
+        Sensor("SMOKE_001", "Bedroom", "smoke")
+    ]
+    
+    # Simulate time passing (each iteration = 1 minute)
+    for minute in range(duration_minutes):
+        current_time = datetime.now().strftime("%H:%M:%S")
+        print(f"\nTime: {current_time}")
+        
+        for sensor in sensor_objects:
+            reading = sensor.read()
+            
+            # Display formatted reading outputs
+            if sensor.type == "temperature":
+                status = "Normal" if 65 <= reading <= 75 else "Abnormal"
+                print(f"[READING] {sensor.location} Temperature: {reading}°F ({status})")
+            elif sensor.type == "motion":
+                status = "DETECTED" if reading else "No activity"
+                print(f"[READING] {sensor.location} Motion: {status}")
+            elif sensor.type == "door":
+                print(f"[READING] {sensor.location}: {reading}")
+            elif sensor.type == "smoke":
+                print(f"[READING] {sensor.location} Smoke: {reading}")
+            
+            # Convert sensor object back to dictionary format for processing rules
+            sensor_dict = {
+                "id": sensor.id,
+                "location": sensor.location,
+                "type": sensor.type,
+                "threshold": sensor.threshold
+            }
+            
+            alerts = process_reading(sensor_dict, reading, system_mode)
+            
+            # Trigger all generated alerts
+            for alert in alerts:
+                trigger_alert(alert)
+                if alert["severity"] in ["HIGH", "CRITICAL"]:
+                    log_event("Sending notification to homeowner...")
+         # Small delay to make output readable (optional)
+        import time
+        time.sleep(0.5)  # Delay to make console output readable
+    
+    print("\n" + "=" * 50)
+    print("Simulation complete!")
+    print("=" * 50)
+
+# Main execution entry point
+if __name__ == "__main__":
+    run_simulation(duration_minutes=3, system_mode="AWAY") 
