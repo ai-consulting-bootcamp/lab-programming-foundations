@@ -1,0 +1,151 @@
+# Lab proof
+
+## Program
+File: homeguard_system.ipynb
+
+## How to run
+Run command: Run All in VS Code's notebook
+
+## How the code works
+The code uses lists, dictionaries, cases, functions and conditions to read motion, temperature, door, and smoke sensors. It evaluates each reading against parameters such as safety, security, comfort rules for the selected system mode (away, home, sleep) and generates alerts with various degrees of priorities when the conditions are met. It displays the alerts, and logs with timestamps.
+
+
+## Fixed test cases and output
+
+### Test 1: SECURITY TEST (open door)
+Input: Door Open in Away mode
+Output:
+[ALERT!] 🚨 HIGH: Door opened while away!
+
+### Test 2a: SAFETY TEST (temperature)
+Input: 30°F in HOME mode; this is below the 35°F safety limit.
+Output:
+[ALERT!] ⚠️ MEDIUM: Abnormal temperature reading: 30°F
+[ALERT!] ℹ️ LOW: Temperature outside comfort range: 30°F
+
+###Test 2b: SAFETY TEST (smoke)
+Input: Smoke detected in Home mode
+Output:
+[ALERT!] 🚨 HIGH: Smoke detected!
+
+###Test 3: COMFORT TEST
+Input: temperature of 60°F in HOME mode, which is below the comfort range of 65-75°F
+Output:
+[ALERT!] ℹ️ LOW: Temperature outside comfort range: 60°F
+
+## Simulator output- HOME MODE
+
+==================================================
+=== HomeGuard Security System ===
+==================================================
+Mode: HOME
+
+Time: 17:47:11
+[READING] Living Room Motion: DETECTED
+[READING] Kitchen Temperature: 43°F (Abnormal)
+[ALERT!] ℹ️ LOW: Temperature outside comfort range: 43°F
+[READING] Front Door: OPEN
+[READING] Bedroom Smoke: DETECTED
+[ALERT!] 🚨 HIGH: Smoke detected!
+[LOG] [17:47:11] Sending notification to homeowner...
+
+Time: 17:47:12
+[READING] Living Room Motion: DETECTED
+[READING] Kitchen Temperature: 41°F (Abnormal)
+[ALERT!] ℹ️ LOW: Temperature outside comfort range: 41°F
+[READING] Front Door: CLOSED
+[READING] Bedroom Smoke: CLEAR
+
+Time: 17:47:12
+[READING] Living Room Motion: No activity
+[READING] Kitchen Temperature: 36°F (Abnormal)
+[ALERT!] ℹ️ LOW: Temperature outside comfort range: 36°F
+[READING] Front Door: CLOSED
+[READING] Bedroom Smoke: CLEAR
+
+==================================================
+Simulation complete!
+==================================================
+
+
+
+## Simulator output- SLEEP MODE
+Simulation to check SLEEP MODE (3 rounds were run in 3 minutes)
+
+==================================================
+=== HomeGuard Security System ===
+==================================================
+Mode: SLEEP
+
+Time: 17:47:13
+[READING] Living Room Motion: DETECTED
+[READING] Kitchen Temperature: 64°F (Abnormal)
+[READING] Front Door: CLOSED
+[READING] Bedroom Smoke: DETECTED
+[ALERT!] 🚨 HIGH: Smoke detected!
+[LOG] [17:47:13] Sending notification to homeowner...
+
+Time: 17:47:13
+[READING] Living Room Motion: DETECTED
+[READING] Kitchen Temperature: 59°F (Abnormal)
+[READING] Front Door: CLOSED
+[READING] Bedroom Smoke: DETECTED
+[ALERT!] 🚨 HIGH: Smoke detected!
+[LOG] [17:47:13] Sending notification to homeowner...
+
+Time: 17:47:14
+[READING] Living Room Motion: No activity
+[READING] Kitchen Temperature: 55°F (Abnormal)
+[READING] Front Door: OPEN
+[READING] Bedroom Smoke: DETECTED
+[ALERT!] 🚨 HIGH: Smoke detected!
+[LOG] [17:47:14] Sending notification to homeowner...
+
+==================================================
+Simulation complete!
+==================================================
+
+
+## Simulator output- AWAY MODE
+
+==================================================
+=== HomeGuard Security System ===
+==================================================
+Mode: AWAY
+
+Time: 17:47:14
+[READING] Living Room Motion: No activity
+[READING] Kitchen Temperature: 55°F (Abnormal)
+[READING] Front Door: CLOSED
+[READING] Bedroom Smoke: DETECTED
+[ALERT!] 🚨 HIGH: Smoke detected!
+[LOG] [17:47:14] Sending notification to homeowner...
+
+Time: 17:47:15
+[READING] Living Room Motion: DETECTED
+[ALERT!] 🚨 HIGH: Motion detected while away!
+[LOG] [17:47:15] Sending notification to homeowner...
+[READING] Kitchen Temperature: 94°F (Abnormal)
+[READING] Front Door: CLOSED
+[READING] Bedroom Smoke: CLEAR
+
+Time: 17:47:15
+[READING] Living Room Motion: No activity
+[READING] Kitchen Temperature: 56°F (Abnormal)
+[READING] Front Door: CLOSED
+[READING] Bedroom Smoke: DETECTED
+[ALERT!] 🚨 HIGH: Smoke detected!
+[LOG] [17:47:15] Sending notification to homeowner...
+
+==================================================
+Simulation complete!
+==================================================
+
+## Edge case
+Temperature reading of 65F is used as an edge case. The code checks whether the temperature is below 65°F or above 75°F. At exactly 65°F, neither condition is true.
+This is checked by the edge case to ensure the code works as intended.
+
+Output: 
+Returned alerts: []
+At exactly 65°F, no comfort alert is created.
+
